@@ -1,9 +1,19 @@
-import { signOut } from "next-auth/react";
+import { getSession, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import Header from "../components/Header";
 import Sidebar from "../components/Sidebar";
 
 export default function Home() {
+  const router = useRouter();
+  const { status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      // if not authenticated -> redirect to home
+      router.push("/home");
+    },
+  });
+
   return (
     <div className="bg-[#F3F2EF] dark:bg-black dark:text-white h-screen overflow-y-scroll md:space-y-6">
       <Head>
@@ -24,4 +34,24 @@ export default function Home() {
       </main>
     </div>
   );
+}
+
+export async function getServerSideProps(context) {
+  // check if the user is authenticated
+  const session = await getSession(context);
+  if (!session) {
+    console.log("redirecting due to lack of session: ", context);
+    return {
+      redirect: {
+        permanent: false,
+        destination: "/home",
+      },
+    };
+  }
+
+  return {
+    props: {
+      session,
+    },
+  };
 }
