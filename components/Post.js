@@ -9,6 +9,7 @@ import ReplyRoundedIcon from "@mui/icons-material/ReplyRounded";
 import CommentOutlinedIcon from "@mui/icons-material/CommentOutlined";
 import { useSession } from "next-auth/react";
 import { useRecoilState } from "recoil";
+import TimeAgo from "timeago-react";
 import { handlePostState, getPostState } from "../atoms/postAtom";
 import { modalState, modalTypeState } from "../atoms/modalAtom";
 
@@ -47,7 +48,10 @@ function Post({ post, modalPost }) {
             {post.username}
           </h6>
           <p className="text-sm dark:text-white/75 opacity-80">{post.email}</p>
-          {/* X hours ago timestamp */}
+          <TimeAgo
+            datetime={post.createdAt}
+            className="text-xs dark:text-white/75 opacity-80"
+          />
         </div>
 
         {modalPost ? (
@@ -85,6 +89,43 @@ function Post({ post, modalPost }) {
           }}
         />
       )}
+
+      <div className="flex justify-evenly items-center dark:border-t border-gray-600/80 mx-2.5 pt-2 text-black/60 dark:text-white/75">
+        {modalPost ? (
+          <button className="postButton">
+            <CommentOutlinedIcon />
+            <h4>Comment</h4>
+          </button>
+        ) : (
+          <button
+            className={`postButton ${liked && "text-blue-500"}`}
+            onClick={() => setLiked(!liked)}
+          >
+            {liked ? (
+              <ThumbUpOffAltRoundedIcon className="-scale-x-100" />
+            ) : (
+              <ThumbUpOffAltOutlinedIcon className="-scale-x-100" />
+            )}
+
+            <h4>Like</h4>
+          </button>
+        )}
+
+        {session?.user?.email === post.email ? (
+          <button
+            className="postButton focus:text-red-400"
+            onClick={deletePost}
+          >
+            <DeleteRoundedIcon />
+            <h4>Delete post</h4>
+          </button>
+        ) : (
+          <button className="postButton ">
+            <ReplyRoundedIcon className="-scale-x-100" />
+            <h4>Share</h4>
+          </button>
+        )}
+      </div>
     </div>
   );
 }
